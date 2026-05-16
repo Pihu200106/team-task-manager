@@ -6,6 +6,7 @@ const createTask = async (req, res) => {
       title,
       description,
       status,
+      priority,
       dueDate,
       projectId,
       assignedTo,
@@ -16,6 +17,7 @@ const createTask = async (req, res) => {
         title,
         description,
         status,
+        priority,
         dueDate: new Date(dueDate),
         projectId,
         assignedTo,
@@ -27,6 +29,8 @@ const createTask = async (req, res) => {
       task,
     });
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -35,15 +39,31 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const tasks = await prisma.task.findMany({
-      include: {
-        project: true,
-        user: true,
-      },
-    });
+    let tasks;
+
+    if (req.user.role === "ADMIN") {
+      tasks = await prisma.task.findMany({
+        include: {
+          project: true,
+          user: true,
+        },
+      });
+    } else {
+      tasks = await prisma.task.findMany({
+        where: {
+          assignedTo: req.user.id,
+        },
+        include: {
+          project: true,
+          user: true,
+        },
+      });
+    }
 
     res.status(200).json(tasks);
   } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -53,6 +73,28 @@ const getTasks = async (req, res) => {
 const updateTaskStatus = async (req, res) => {
   try {
     const { status } = req.body;
+
+    const task = await prisma.task.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    if (
+      req.user.role !== "ADMIN" &&
+      task.assignedTo !== req.user.id
+    ) {
+      return res.status(403).json({
+        message:
+          "You can update only your own tasks",
+      });
+    }
 
     const updatedTask = await prisma.task.update({
       where: {
@@ -68,6 +110,30 @@ const updateTaskStatus = async (req, res) => {
       updatedTask,
     });
   } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
+const deleteTask = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await prisma.task.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    res.status(200).json({
+      message: "Task deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+
     res.status(500).json({
       message: error.message,
     });
@@ -78,4 +144,5 @@ module.exports = {
   createTask,
   getTasks,
   updateTaskStatus,
+  deleteTask,
 };

@@ -6,6 +6,7 @@ const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 const authMiddleware = require("./middleware/authMiddleware");
 
@@ -18,6 +19,7 @@ app.use("/auth", authRoutes);
 app.use("/projects", projectRoutes);
 app.use("/tasks", taskRoutes);
 app.use("/dashboard", dashboardRoutes);
+app.use("/users", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("API is running");

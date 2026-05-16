@@ -39,7 +39,38 @@ const getProjects = async (req, res) => {
   }
 };
 
+const deleteProject = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Delete all tasks related to project first
+    await prisma.task.deleteMany({
+      where: {
+        projectId: parseInt(id),
+      },
+    });
+
+    // Delete project
+    await prisma.project.delete({
+      where: {
+        id: parseInt(id),
+      },
+    });
+
+    res.status(200).json({
+      message: "Project deleted successfully",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createProject,
   getProjects,
+  deleteProject,
 };
