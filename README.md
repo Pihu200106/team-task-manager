@@ -83,10 +83,8 @@ A full-stack Team Task Management System built using React, Node.js, Express, Pr
 - createdById
 
 ## Task
-- id
 - title
 - description
-- status
 - priority
 - dueDate
 - projectId
