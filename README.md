@@ -153,4 +153,5 @@ npm start
 - Better Error Handling
 - Mobile Responsive Design
 
+# AUTHOR
 Pihu Bhardwaj
